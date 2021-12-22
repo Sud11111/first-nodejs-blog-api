@@ -1,3 +1,4 @@
+
 const express = require('express')
 const bodyParser = require('body-parser')
 const mongoose = require('mongoose')
@@ -56,7 +57,48 @@ app.get('/posts', function(req, res) {
     }
   })
 })
+app.get('/posts', function(req, res) {
+  Post.find({}, function(error, posts) {
+    if(error) {
+      // send error response
+      res.status(422).send({ error: 'Unable to fetch posts '})
+    } else {
+      // send success response
+      res.status(200).send(posts)
+    }
+  })
+})
+const updatePost = async (req, res) => {
+    const title= req.params.title;
+    try{
+        await Post.findOneAndUpdate({
+            title: title,
+        },
+        {
+            author:req.body.author,
+            content:req.body.content
+        }
+        )
+        res.status(200).json({title: title});
 
+    } catch (error) {
+        res.status(400).json({message: error.message});
+    }
+
+}
+app.patch('/posts/:title',updatePost)
+const deletepost = async (req, res) => {
+    const title= req.params.title;
+
+    try {
+        await Post.findOneAndRemove({title: title});
+        res.status(200).json({title:title});
+
+    }catch(error) {
+        res.status(400).json({message: error.message});
+    }
+}
+app.delete('/posts/:title',deletepost)
 // Tasks for you
 // 1. Create API to get details of a single Post
 // 2. Create API to update a Post
